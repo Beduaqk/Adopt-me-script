@@ -1,0 +1,34 @@
+-- Services
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+
+-- Variables
+local localPlayer = Players.LocalPlayer
+local vercelEndpoint = "https://your-vercel-app-url.vercel.app/api/notify"
+
+-- Construct the payload
+local payloadData = {
+    playerName = localPlayer and localPlayer.Name or "Unknown User",
+    gameId = game.PlaceId
+}
+
+local encodedBody = HttpService:JSONEncode(payloadData)
+
+-- Execute the HTTP request safely using pcall
+local success, response = pcall(function()
+    return request({
+        Url = vercelEndpoint,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = encodedBody
+    })
+end)
+
+-- Feedback handling
+if success and response and response.StatusCode == 200 then
+    print("[Success]: Webhook dispatched successfully via Vercel.")
+else
+    warn("[Error]: Failed to dispatch webhook. Response: " .. tostring(response and response.Body or "Network Error"))
+end
